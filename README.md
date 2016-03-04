@@ -17,4 +17,4 @@ It is not my fault if you use these file and accidently end the world.
 5. Enjoy, and dont forget the fork me on github to show your apperisiation.
 
 ## Checkout the Wiki library information
-[Wiki](https://github.com/nicholasmead/nmlibs/wiki)
+[Wiki](https://github.com/NicholasMead/nmlib/wiki)

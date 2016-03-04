@@ -33,7 +33,7 @@ namespace nm
 
 		//functions that may be used in combination 
 		bool 	is_empty();
-		T 		peak();
+		T 		peek();
 		void	set_index(size_t i);
 		void 	reset();
 		void	flush();
@@ -61,7 +61,7 @@ namespace nm
 	}
 
 	template<class T>
-	inline T nm::FIFO<T>::peak(){
+	inline T nm::FIFO<T>::peek(){
 		return _FIFO_v[_index];
 	}
 

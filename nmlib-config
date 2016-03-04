@@ -1,0 +1,79 @@
+bindir=${NMLIBSYS}/bin
+libdir=${NMLIBSYS}/lib
+incdir=${NMLIBSYS}/include
+nmlibs=$(<${NMLIBSYS}/etc/libflags.etc)
+auxcflags="-std=c++11 -pthread"
+
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *)    optarg= ;;
+  esac
+
+  case $1 in
+    --prefix=*)
+      ### Set the prefix
+      prefix=$optarg
+      bindir=${prefix}/bin
+      libdir=${prefix}/lib
+      incdir=${prefix}/include
+      if test $exec_prefix_set = no ; then
+         exec_prefix=$optarg
+      fi
+      ;;
+    --prefix)
+      ### Output the prefix
+      out="$out $prefix"
+      ;;
+    --cflags)
+      ### Output the compiler flags
+      if test ${incdir} != /usr/include; then
+         ### In case we're on a Win32 system, we need to expand the
+         ### path to a backslash seperated path
+         includes=-I${incdir}
+         out="$out ${auxcflags} $includes"
+      fi
+      ;;
+    --libs)
+      ### Output regular ROOT libraries.  If the user said --glibs --libs,
+      ### we've already output the libraries, so we skip this section
+      if test "x$libsout" = "xyes" ; then
+         shift
+         continue
+      fi
+      ### Set the flag
+      libsout="yes"
+      out="$out -L${libdir} ${nmlibs}"
+      ;;
+    --libdir)
+      ### output the library directory
+      out="$out $libdir"
+      ;;
+    --incdir)
+      ### output the header directory
+      out="$out $incdir"
+      ;;
+    --help)
+      ### Print a help message
+      echo "Usage: `basename $0` [options]"
+      echo ""
+      echo "  --prefix[=dir]        Print or set prefix"
+      echo "  --libs                Print regular NMLIB libraries"
+      echo "  --cflags              Print compiler flags and header path"
+      echo "  --libdir              Print the library directory"
+      echo "  --incdir              Print the header directory"
+      echo "  --help                Print this message"
+      #exit 0
+      ;;
+    *)
+      ### Give an error
+      echo "Unknown argument \"$1\"!" 1>&2
+      echo "${usage}" 1>&2
+      #exit 1
+      ;;
+  esac
+  shift
+done
+
+### Output the stuff
+echo $out

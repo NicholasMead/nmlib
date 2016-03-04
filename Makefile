@@ -12,7 +12,7 @@ COMP=UNDEFINED
 ifeq ($(OS),OSX)
 COMP=OSX
 LIBS=$(SRC:%.cpp=%.dylib)
-MLIBS=$(LIBS:%.dylib=l%)
+NMLIBS=$(LIBS:%.dylib=l%)
 else
 COMP=Linux
 LIBS=$(SRC:%.cpp=lib%.so)
@@ -25,29 +25,33 @@ all: $(LIBS)
 %.dylib : %.cpp
 	$(CXX) -dynamiclib $(CFLAGS) $< -o $@
 
-%.o : %.cpp
-	$(CXX) -fPIC -c $(CFLAGS) $< -o $@
-	
+#Linus shared library comilation
 lib%.so : %.o
 	$(CXX) -shared $< -o $@
+%.o : %.cpp
+	$(CXX) -fPIC -c $(CFLAGS) $< -o $@	
 
-install:
+install: all
 	@echo Creating file structure in $(PREFIX)/nmlibs
 	@test -d $(PREFIX)/nmlib || mkdir $(PREFIX)/nmlib/
-	@test -d $(PREFIX)/nmlib/libs || mkdir $(PREFIX)/nmlib/libs
+	@test -d $(PREFIX)/nmlib/lib || mkdir $(PREFIX)/nmlib/lib
 	@test -d $(PREFIX)/nmlib/include || mkdir $(PREFIX)/nmlib/include
 	@test -d $(PREFIX)/nmlib/bin || mkdir $(PREFIX)/nmlib/bin
 	@test -d $(PREFIX)/nmlib/source || mkdir $(PREFIX)/nmlib/source
+	@test -d $(PREFIX)/nmlib/etc || mkdir $(PREFIX)/nmlib/etc
 ifeq ($(OS),OSX)
-	@mv -v *.dylib $(PREFIX)/nmlib/libs/
+	@mv -vf *.dylib $(PREFIX)/nmlib/lib/
 else
-	@mv -v *.so $(PREFIX)/nmlib/libs/
+	@mv -vf *.so $(PREFIX)/nmlib/lib/
 endif
-	@cp -v *.cpp $(PREFIX)/nmlib/source
-	@cp -v *.h $(PREFIX)/nmlib/include
-
+	@cp -vf *.cpp $(PREFIX)/nmlib/source
+	@cp -vf *.h $(PREFIX)/nmlib/include
+	@cp -vf nmlib-config this-nmlib.sh $(PREFIX)/nmlib/bin
+	@chmod a+x -v $(PREFIX)/nmlib/bin/*
+	@echo $(NMLIBS)>libflags.etc
+	@chmod a+r -v libflags.etc
+	@cp -v libflags.etc ${PREFIX}/nmlib/etc
 	
-
 clean:
-	rm -fv *.dylib *.o *.so
+	rm -fv *.dylib *.o *.so *.etc
 	rm -rfv nmlib

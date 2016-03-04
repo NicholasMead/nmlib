@@ -1,36 +1,53 @@
 OS?=Linux
-DIR?=.
+PREFIX?=.
+CXX?=g++
+CFLAGS= -std=c++11
+SRC=${wildcard *.cpp}
+COMP=UNDEFINED
 
-all: nmthread nmstore
+.PHONY: all install
 
-nmthread: nmthread.cpp nmthread.h
+.SUFFIXES: .so .dylib .cpp
+ 
 ifeq ($(OS),OSX)
-	g++ -dynamiclib nmthread.cpp -o libnmthread.dylib
+COMP=OSX
+LIBS=$(SRC:%.cpp=%.dylib)
+MLIBS=$(LIBS:%.dylib=l%)
 else
-	g++ -fpic -o nmthread.o nmthread.cpp
-	g++ -shared -o libnmthread.so nmthread.o
+COMP=Linux
+LIBS=$(SRC:%.cpp=lib%.so)
+NMLIBS=$(LIBS:lib%.so=-l%)
 endif
 
-nmstore: nmstore.cpp nmstore.h
-ifeq ($(OS),OSX)
-	g++ -dynamiclib nmstore.cpp -o libnmstore.dylib
-else
-	g++ -fpic -o nmstore.o nmstore.cpp
-	g++ -shared -o libnmstore.so nmstore.o
-endif
+all: $(LIBS)
+
+#OSX dynamic library compilation
+%.dylib : %.cpp
+	$(CXX) -dynamiclib $(CFLAGS) $< -o $@
+
+%.o : %.cpp
+	$(CXX) -fPIC -c $(CFLAGS) $< -o $@
+	
+lib%.so : %.o
+	$(CXX) -shared $< -o $@
 
 install:
-	mkdir $(DIR)/nmlib
-	mkdir $(DIR)/nmlib/libs
-	mkdir $(DIR)/nmlib/include
-	mkdir $(DIR)/nmlib/bin
+	@echo Creating file structure in $(PREFIX)/nmlibs
+	@test -d $(PREFIX)/nmlib || mkdir $(PREFIX)/nmlib/
+	@test -d $(PREFIX)/nmlib/libs || mkdir $(PREFIX)/nmlib/libs
+	@test -d $(PREFIX)/nmlib/include || mkdir $(PREFIX)/nmlib/include
+	@test -d $(PREFIX)/nmlib/bin || mkdir $(PREFIX)/nmlib/bin
+	@test -d $(PREFIX)/nmlib/source || mkdir $(PREFIX)/nmlib/source
 ifeq ($(OS),OSX)
-	mv *.dylib $(DIR)/nmlib/libs/
+	@mv -v *.dylib $(PREFIX)/nmlib/libs/
 else
-	mv *.so $(DIR)/nmlib/libs/
+	@mv -v *.so $(PREFIX)/nmlib/libs/
 endif
+	@cp -v *.cpp $(PREFIX)/nmlib/source
+	@cp -v *.h $(PREFIX)/nmlib/include
+
 	
 
 clean:
-	rm -f *.dylib *.o *.so
-	rm -rf nmlib
+	rm -fv *.dylib *.o *.so
+	rm -rfv nmlib

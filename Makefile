@@ -1,7 +1,7 @@
 OS?=Linux
 PREFIX?=.
 CXX?=g++
-CFLAGS= -std=c++11
+CFLAGS= -std=c++14
 SRC=${wildcard *.cpp}
 COMP=UNDEFINED
 

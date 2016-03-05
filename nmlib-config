@@ -2,7 +2,7 @@ bindir=${NMLIBSYS}/bin
 libdir=${NMLIBSYS}/lib
 incdir=${NMLIBSYS}/include
 nmlibs=$(<${NMLIBSYS}/etc/libflags.etc)
-auxcflags="-std=c++11 -pthread"
+auxcflags="-std=c++14 -pthread"
 
 while test $# -gt 0; do
   case "$1" in
